@@ -8,26 +8,27 @@ datasource db {
 }
 
 model Account {
-  id            Int         @id
-  name          String      @unique(map: "name") @db.VarChar(64)
-  is_temp       Boolean?    @default(false)
+  id            Int           @id @default(autoincrement())
+  name          String        @unique(map: "name") @db.VarChar(64)
+  is_temp       Boolean?      @default(false)
   liquidity     Int?
   contra_of     Int?
   type          Int?
-  Account       Account?    @relation("AccountToAccount", fields: [contra_of], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Account_ibfk_1")
-  other_Account Account[]   @relation("AccountToAccount")
+  Account       Account?      @relation("AccountToAccount", fields: [contra_of], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Account_ibfk_1")
+  other_Account Account[]     @relation("AccountToAccount")
   EntryItem     EntryItem[]
+  UserAccount   UserAccount[]
 
   @@index([contra_of], map: "contra_of")
 }
 
 model AccountType {
-  type Int    @id
+  type Int    @id @default(autoincrement())
   name String @db.VarChar(64)
 }
 
 model Entry {
-  id           Int         @id
+  id           Int         @id @default(autoincrement())
   owner_id     Int?
   date_entered DateTime    @db.Date
   User         User?       @relation(fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Entry_ibfk_1")
@@ -49,20 +50,30 @@ model EntryItem {
 }
 
 model EntryItemType {
-  type Int     @id
+  type Int     @id @default(autoincrement())
   name String? @db.VarChar(64)
 }
 
 model InvalidToken {
-  token_id Int      @id
+  token_id String    @id @db.Char(32)
   exp      DateTime @db.Date
 }
 
 model User {
-  id              Int     @id
-  username        String  @unique(map: "username") @db.VarChar(64)
-  email           String  @unique(map: "email") @db.VarChar(64)
-  password_hashed String  @db.VarChar(64)
-  salt            String? @db.VarChar(64)
+  id              Int           @id @default(autoincrement())
+  username        String        @unique(map: "username") @db.VarChar(32)
+  email           String        @unique(map: "email") @db.VarChar(64)
+  password_hashed String         @db.Char(60)
   Entry           Entry[]
+  UserAccount     UserAccount[]
+}
+
+model UserAccount {
+  id      Int
+  uid     Int
+  Account Account @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "UserAccount_ibfk_1")
+  User    User    @relation(fields: [uid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "UserAccount_ibfk_2")
+
+  @@id([id, uid])
+  @@index([uid], map: "uid")
 }

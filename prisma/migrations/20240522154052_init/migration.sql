@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `Account` (
-    `id` INTEGER NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(64) NOT NULL,
     `is_temp` BOOLEAN NULL DEFAULT false,
     `liquidity` INTEGER NULL,
@@ -14,7 +14,7 @@ CREATE TABLE `Account` (
 
 -- CreateTable
 CREATE TABLE `AccountType` (
-    `type` INTEGER NOT NULL,
+    `type` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(64) NOT NULL,
 
     PRIMARY KEY (`type`)
@@ -22,7 +22,7 @@ CREATE TABLE `AccountType` (
 
 -- CreateTable
 CREATE TABLE `Entry` (
-    `id` INTEGER NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `owner_id` INTEGER NULL,
     `date_entered` DATE NOT NULL,
 
@@ -43,7 +43,7 @@ CREATE TABLE `EntryItem` (
 
 -- CreateTable
 CREATE TABLE `EntryItemType` (
-    `type` INTEGER NOT NULL,
+    `type` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(64) NULL,
 
     PRIMARY KEY (`type`)
@@ -51,7 +51,7 @@ CREATE TABLE `EntryItemType` (
 
 -- CreateTable
 CREATE TABLE `InvalidToken` (
-    `token_id` INTEGER NOT NULL,
+    `token_id` BINARY(32) NOT NULL,
     `exp` DATE NOT NULL,
 
     PRIMARY KEY (`token_id`)
@@ -59,15 +59,23 @@ CREATE TABLE `InvalidToken` (
 
 -- CreateTable
 CREATE TABLE `User` (
-    `id` INTEGER NOT NULL,
-    `username` VARCHAR(64) NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(32) NOT NULL,
     `email` VARCHAR(64) NOT NULL,
-    `password_hashed` VARCHAR(64) NOT NULL,
-    `salt` VARCHAR(64) NULL,
+    `password_hashed` BINARY(32) NOT NULL,
 
     UNIQUE INDEX `username`(`username`),
     UNIQUE INDEX `email`(`email`),
     PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserAccount` (
+    `id` INTEGER NOT NULL,
+    `uid` INTEGER NOT NULL,
+
+    INDEX `uid`(`uid`),
+    PRIMARY KEY (`id`, `uid`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
@@ -82,3 +90,8 @@ ALTER TABLE `EntryItem` ADD CONSTRAINT `EntryItem_ibfk_1` FOREIGN KEY (`entry_re
 -- AddForeignKey
 ALTER TABLE `EntryItem` ADD CONSTRAINT `EntryItem_ibfk_2` FOREIGN KEY (`account_ref`) REFERENCES `Account`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
+-- AddForeignKey
+ALTER TABLE `UserAccount` ADD CONSTRAINT `UserAccount_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Account`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `UserAccount` ADD CONSTRAINT `UserAccount_ibfk_2` FOREIGN KEY (`uid`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
