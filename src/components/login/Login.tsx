@@ -8,9 +8,10 @@ import { Button } from "primereact/button";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
 
-export default () => {
-    const [loading, setLoading] = useState<boolean>(false);
-
+const Login = () => {
+    const [loading, setLoading] = useState(false);
+    const [usernameOrEmail, setUsernameOrEmail] = useState("");
+    const [password, setPassword] = useState("");
     const router = useRouter();
 
     const toast = useRef<Toast>(null);
@@ -18,10 +19,6 @@ export default () => {
     const loginHandler = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoading(true);
-
-        const formData = new FormData(event.currentTarget);
-        let usernameOrEmail = formData.get("usernameOrEmail")
-        let password = formData.get("password")
 
         const res = await fetch("/api/auth/login", {
             method: "POST",
@@ -38,7 +35,8 @@ export default () => {
             });
 
         } else if (res.status == 200) {
-            console.log("aaa")
+            const {csrfToken} = await res.json();
+            localStorage.setItem("csrfToken", csrfToken);
             router.push("/home/dashboard");
         } else {
             if (res.status !== 500) {
@@ -63,7 +61,11 @@ export default () => {
                 <div className="m-5">
                     <div className="mb-5">
                         <span className="p-float-label">
-                            <InputText className="w-full" id="usernameOrEmail" name="usernameOrEmail"/>
+                            <InputText
+                                className="w-full" id="usernameOrEmail" name="usernameOrEmail"
+                                value={usernameOrEmail}
+                                onChange={e => setUsernameOrEmail(e.target.value)}
+                            />
                             <label htmlFor="usernameOrEmail">Username or Email</label>
                         </span>
                     </div>
@@ -75,6 +77,8 @@ export default () => {
                                 feedback={false}
                                 inputId="password"
                                 name="password"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
                             />
 							<label htmlFor="password">Password</label>
 						</span>
@@ -88,3 +92,5 @@ export default () => {
         </form>
     );
 }
+
+export default Login;

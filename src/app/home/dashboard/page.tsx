@@ -5,9 +5,10 @@ import {Toast} from "primereact/toast";
 import {useRef} from "react";
 import {useRouter} from "next/navigation";
 
-export default () => {
+const DashboardPage = () => {
     const toast = useRef<Toast>(null);
     const router = useRouter()
+
     const logOut = async () => {
         const res = await fetch("/api/auth/logout", {
             method: "POST",
@@ -21,7 +22,11 @@ export default () => {
             })
             router.push("/")
         } else if (res.status === 500) {
-
+            toast.current!.show({
+                severity: "error",
+                summary: "Error",
+                detail: "An unknown error has occurred"
+            })
         } else if (res.status === 200) {
             router.push("/")
         }
@@ -29,9 +34,10 @@ export default () => {
 
     return (
         <>
-
-        <Toast ref={toast} />
-        <Button label="Log out" severity="danger" onClick={logOut} />
+            <Toast ref={toast} />
+            <Button label="Log out" severity="danger" onClick={logOut} />
         </>
     )
 }
+
+export default DashboardPage;

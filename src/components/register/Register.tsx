@@ -6,7 +6,6 @@ import {Password} from "primereact/password";
 import {Button} from "primereact/button";
 import {FormEvent, useRef, useState} from "react";
 import {z, ZodError} from "zod"
-import {useRouter} from "next/navigation";
 
 const schema = z.object({
     username: z.string({required_error: "Username is required"})
@@ -30,12 +29,15 @@ const schema = z.object({
     {message: "Enter a matching password", path: ["confirmPassword"]}
 );
 
-export default () => {
+const Register = () => {
     const [loading, setLoading] = useState(false);
     const [formErrors, setFormErrors] = useState<{ username?: string, email?: string, password?: string, confirmPassword?: string}>({});
     const toast = useRef<Toast>(null);
 
-    const router = useRouter();
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const registerHandler = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -44,16 +46,16 @@ export default () => {
         setFormErrors({})
 
 
-        const formData = new FormData(event.currentTarget);
-        let username: string, email: string, password: string;
         try {
-            ({username, email, password} = schema.parse({
-                username: formData.get("username"),
-                email: formData.get("email"),
-                password: formData.get("password"),
-                confirmPassword: formData.get("confirmPassword")
-            }));
+            schema.parse({
+                username: username,
+                email: email,
+                password: password,
+                confirmPassword: confirmPassword
+            });
         } catch (e) {
+            setPassword("");
+            setConfirmPassword("")
             if (e instanceof ZodError) {
                 const errors: {[key: string]: string} = {}
                 e.errors.forEach((err) => {
@@ -61,7 +63,7 @@ export default () => {
                     if (!errors[field]) {
                         errors[field] = err.message
                     }
-                })
+                });
                 setFormErrors(errors)
             } else {
                 toast.current!.show({
@@ -70,7 +72,9 @@ export default () => {
                     detail: "An error occurred. Please try again later",
                     life: 3000,
                 })
+                console.log(e);
             }
+
             setLoading(false);
             return;
         }
@@ -79,23 +83,29 @@ export default () => {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({username, email, password})
-        })
+        });
 
         if (res.ok) {
             toast.current!.show({
                 severity: "success",
                 summary: "Success",
-                detail: "Successfully created an account",
+                detail: "Successfully created an account. Redirecting to the main page",
                 life: 3000,
-            })
-            router.push("/")
+            });
+
+            setUsername("");
+            setEmail("");
+            setPassword("");
+            setConfirmPassword("");
         } else {
+            setPassword("");
+            setConfirmPassword("");
             toast.current!.show({
                 severity: "error",
                 summary: "Error",
                 detail: (await res.json()).error ?? "An error occurred",
                 life: 3000,
-            })
+            });
 
         }
         setLoading(false);
@@ -109,7 +119,12 @@ export default () => {
                 <div className="m-5">
                     <div className="mb-5 text-left">
 						<span className="p-float-label">
-							<InputText className="w-full" id="username" name="username" invalid={!!formErrors.username}/>
+							<InputText
+                                className="w-full" id="username" name="username"
+                                invalid={!!formErrors.username}
+                                value={username}
+                                onChange={e => setUsername(e.target.value)}
+                            />
 							<label htmlFor="username">Username</label>
 						</span>
                         <small className="p-error">{formErrors.username}</small>
@@ -117,7 +132,12 @@ export default () => {
 
                     <div className="mb-5 text-left">
 						<span className="p-float-label">
-							<InputText className="w-full" id="email" name="email" invalid={!!formErrors.email}/>
+							<InputText
+                                className="w-full" id="email" name="email"
+                                invalid={!!formErrors.email}
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
 							<label htmlFor="email">Email</label>
 						</span>
                         <small className="p-error">{formErrors.email}</small>
@@ -132,6 +152,8 @@ export default () => {
                                 inputId="password"
                                 name="password"
                                 invalid={!!formErrors.password}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
                             />
 							<label htmlFor="password">Password</label>
 						</span>
@@ -147,6 +169,8 @@ export default () => {
                                 inputId="confirmPassword"
                                 name="confirmPassword"
                                 invalid={!!formErrors.confirmPassword}
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
                             />
 							<label htmlFor="confirmPassword">Confirm Password</label>
 						</span>
@@ -161,3 +185,6 @@ export default () => {
         </form>
     );
 }
+
+
+export default Register;

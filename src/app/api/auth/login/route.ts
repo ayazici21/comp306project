@@ -2,7 +2,7 @@ import {getUser} from "@/lib/auth"
 import {NextRequest, NextResponse} from "next/server";
 import * as jwtUtils from "@/lib/jwtUtils"
 import bcrypt from "bcrypt";
-
+import * as crypto from "crypto";
 export const POST = async (req: NextRequest) => {
     try {
         const {usernameOrEmail, password}: {usernameOrEmail: string, password: string} = await req.json();
@@ -26,14 +26,22 @@ export const POST = async (req: NextRequest) => {
             const value = await bcrypt.compare(password, user.password_hashed)
 
             if (value) {
-                let res = NextResponse.json<object>({username: user.username, email: user.email}, {status: 200});
-
+                const csrfToken = crypto.randomUUID();
+                let res = NextResponse.json<object>({username: user.username, email: user.email, csrfToken}, {status: 200});
                 try {
                     res.cookies.set({
                         name: "jwt",
                         value: await jwtUtils.createToken({username: user.username, email: email}),
                         httpOnly: true,
-                        path: "/"
+                        path: "/",
+                        maxAge: 60 * 60 * 12
+                    })
+                    res.cookies.set({
+                        name: "csrfToken",
+                        value: csrfToken,
+                        httpOnly: true,
+                        path: "/",
+                        maxAge: 60 * 60 * 12
                     })
                 } catch (e) {
                     res = NextResponse.json({error: "An error occurred"}, {status: 500});

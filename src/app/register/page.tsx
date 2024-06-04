@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Register from "@/components/register/Register";
 
-export default () => {
+const RegisterPage = () => {
     return (
         <div className="flex h-screen justify-content-center">
             <div className="my-auto w-8 md:w-6 lg:w-4">
@@ -14,3 +14,5 @@ export default () => {
         </div>
     );
 }
+
+export default RegisterPage;
