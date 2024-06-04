@@ -30,18 +30,16 @@ const Login = () => {
             toast.current!.show({
                 severity: "error",
                 summary: "Error",
-                detail: "Incorrect email or password",
+                detail: "Incorrect credentials",
                 life: 3000,
             });
 
         } else if (res.status == 200) {
-            const {csrfToken} = await res.json();
+            const {id, csrfToken} = await res.json();
+            localStorage.setItem("userId", id);
             localStorage.setItem("csrfToken", csrfToken);
             router.push("/home/dashboard");
         } else {
-            if (res.status !== 500) {
-                console.log(res.body);
-            }
             toast.current!.show({
                 severity: "error",
                 summary: "Error",

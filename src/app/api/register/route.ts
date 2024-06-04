@@ -21,8 +21,6 @@ export const POST = async (req: NextRequest) => {
     } else {
         return NextResponse.json({success: true}, {status: 201});
     }
-
-
 }
 
 const storeUser = async (data: {username: string, email: string, password_hashed: string}) => {
@@ -35,6 +33,7 @@ const isUsernameUnique = async (username: string): Promise<boolean> => {
     const user = await prisma.user.findUnique({
         where: {username: username}
     })
+
     return user === null;
 }
 
