@@ -10,10 +10,10 @@ datasource db {
 model Account {
   id            Int           @id @default(autoincrement())
   name          String        @unique(map: "name") @db.VarChar(64)
-  is_temp       Boolean?      @default(false)
-  liquidity     Int?
+  is_temp       Boolean       @default(false)
+  liquidity     Int           @default(0)
   contra_of     Int?
-  type          Int?
+  type          AccountType
   Account       Account?      @relation("AccountToAccount", fields: [contra_of], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Account_ibfk_1")
   other_Account Account[]     @relation("AccountToAccount")
   EntryItem     EntryItem[]
@@ -22,16 +22,17 @@ model Account {
   @@index([contra_of], map: "contra_of")
 }
 
-model AccountType {
-  type Int    @id @default(autoincrement())
-  name String @db.VarChar(64)
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
 }
 
 model Entry {
   id           Int         @id @default(autoincrement())
-  owner_id     Int?
+  owner_id     Int
   date_entered DateTime    @db.Date
-  User         User?       @relation(fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Entry_ibfk_1")
+  User         User        @relation(fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Entry_ibfk_1")
   EntryItem    EntryItem[]
 
   @@index([owner_id], map: "owner_id")
@@ -40,22 +41,22 @@ model Entry {
 model EntryItem {
   entry_ref   Int
   account_ref Int
-  item_type   Int?
+  item_type   EntryItemType
   value       Int
-  Entry       Entry   @relation(fields: [entry_ref], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "EntryItem_ibfk_1")
-  Account     Account @relation(fields: [account_ref], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "EntryItem_ibfk_2")
+  Entry       Entry         @relation(fields: [entry_ref], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "EntryItem_ibfk_1")
+  Account     Account       @relation(fields: [account_ref], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "EntryItem_ibfk_2")
 
   @@id([entry_ref, account_ref])
   @@index([account_ref], map: "account_ref")
 }
 
-model EntryItemType {
-  type Int     @id @default(autoincrement())
-  name String? @db.VarChar(64)
+enum EntryItemType {
+  DEBIT
+  CREDIT
 }
 
 model InvalidToken {
-  token_id String    @id @db.Char(32)
+  token_id String   @id @db.Char(32)
   exp      DateTime @db.Date
 }
 
@@ -63,7 +64,7 @@ model User {
   id              Int           @id @default(autoincrement())
   username        String        @unique(map: "username") @db.VarChar(32)
   email           String        @unique(map: "email") @db.VarChar(64)
-  password_hashed String         @db.Char(60)
+  password_hashed String        @db.Char(60)
   Entry           Entry[]
   UserAccount     UserAccount[]
 }
