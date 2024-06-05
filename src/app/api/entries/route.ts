@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getEntries } from "../../../lib/entryService";
+import { getEntries } from "@/lib/entryService";
 
 // GET method handler
 export const GET = async (req: NextRequest) => {
