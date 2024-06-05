@@ -4,6 +4,7 @@ import "./globals.css";
 import 'primereact/resources/themes/lara-dark-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import "primeflex/primeflex.min.css"
+import React from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 

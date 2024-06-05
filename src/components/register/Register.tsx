@@ -100,10 +100,11 @@ const Register = () => {
         } else {
             setPassword("");
             setConfirmPassword("");
+            const json = await res.json();
             toast.current!.show({
                 severity: "error",
                 summary: "Error",
-                detail: (await res.json()).error ?? "An error occurred",
+                detail: json?.error ?? "An error occurred",
                 life: 3000,
             });
 

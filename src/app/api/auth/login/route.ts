@@ -3,6 +3,7 @@ import {NextRequest, NextResponse} from "next/server";
 import * as jwtUtils from "@/lib/jwtUtils"
 import bcrypt from "bcrypt";
 import * as crypto from "crypto";
+
 export const POST = async (req: NextRequest) => {
     try {
         const {usernameOrEmail, password}: {usernameOrEmail: string, password: string} = await req.json();
@@ -27,7 +28,7 @@ export const POST = async (req: NextRequest) => {
 
             if (value) {
                 const csrfToken = crypto.randomUUID();
-                let res = NextResponse.json<object>({username: user.username, email: user.email, csrfToken}, {status: 200});
+                let res = NextResponse.json<object>({id: user.id, username: user.username, email: user.email, csrfToken: csrfToken}, {status: 200});
                 try {
                     res.cookies.set({
                         name: "jwt",
