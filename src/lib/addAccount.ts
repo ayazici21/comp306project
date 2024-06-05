@@ -1,18 +1,16 @@
-enum AccountType {
-  ASSET = "ASSET",
-  LIABILITY = "LIABILITY",
-  EQUITY = "EQUITY"
+import AccountCreateInput = Prisma.AccountCreateInput;
+import AccountUncheckedCreateInput = Prisma.AccountUncheckedCreateInput;
+import XOR = Prisma.XOR;
+import {AccountType, Prisma} from '@prisma/client';
+
+import prisma from "@/lib/prismaClient"
+
+export enum Status {
+    SUCCESS,
+    EXISTS,
+    FAILED,
+    NO_CONTRA_ACCOUNT,
 }
-
-
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-
-// Define constants for return statuses
-export const RETURN_STATUS_SUCCESS = "success";
-export const RETURN_STATUS_ACCOUNT_EXISTS_DIFFERENT_PROPERTIES = "account_exists_different_properties";
-export const RETURN_STATUS_ACCOUNT_CREATION_FAILED = "account_creation_failed";
-export const RETURN_STATUS_USER_ACCOUNT_ASSOCIATION_FAILED = "user_account_association_failed";
 
 export const addAccount = async (
     userId: number,
@@ -20,17 +18,16 @@ export const addAccount = async (
     isTemp: boolean,
     liquidity: number,
     contraAcctName: string | null,
-    type: AccountType // Update type to AccountType
-): Promise<string> => {
+    type: string
+): Promise<Status> => {
+    let accountId: number;
     try {
-        // Check if an account with the given name already exists
         const existingAccount = await prisma.account.findUnique({
             where: {
                 name: accountName,
             },
         });
 
-        // If the account exists, verify its properties
         if (existingAccount) {
             const contraAccount = contraAcctName ? await prisma.account.findUnique({
                 where: {
@@ -38,69 +35,48 @@ export const addAccount = async (
                 },
             }) : null;
 
-            if (
-                existingAccount.is_temp === isTemp &&
-                existingAccount.liquidity === liquidity &&
-                existingAccount.contra_of === contraAccount?.id && contraAccount?.id !== null &&
-                existingAccount.type === existingAccount.type !== null && type in AccountType // Compare with AccountType
-            ) {
-                // If all properties match, add the account ID with the given user ID to the UserAccount table
-                await prisma.userAccount.create({
-                    data: {
-                        id: existingAccount.id,
-                        uid: userId,
-                    },
-                });
-
-                return RETURN_STATUS_SUCCESS;
-            } else {
-                return RETURN_STATUS_ACCOUNT_EXISTS_DIFFERENT_PROPERTIES;
+            if (existingAccount.is_temp !== isTemp
+                || existingAccount.liquidity !== liquidity
+                || existingAccount.contra_of !== contraAccount?.id
+                || existingAccount.type !== type) {
+                return Status.EXISTS;
             }
+
+            accountId = existingAccount.id;
         } else {
-            // Find or create the contra account
-            let contraAccountId: number | null = null;
+            let data: XOR<AccountCreateInput, AccountUncheckedCreateInput> = {
+                name: accountName,
+                is_temp: isTemp,
+                liquidity: liquidity,
+                type: type as AccountType,
+            }
+
             if (contraAcctName) {
                 const contraAccount = await prisma.account.findUnique({
-                    where: { name: contraAcctName },
+                    where: {name: contraAcctName},
                 });
-                if (contraAccount) {
-                    contraAccountId = contraAccount.id;
-                } else {
-                    const newContraAccount = await prisma.account.create({
-                        data: {
-                            name: contraAcctName,
-                            is_temp: true,
-                            liquidity: 0,
-                            type: existingAccount,  /////// NOT SURE ABOUT THE TYPE GOTTA CHECK
-                        },
-                    });
-                    contraAccountId = newContraAccount.id;
+                if (contraAccount === null) {
+                    return Status.NO_CONTRA_ACCOUNT;
                 }
+                data.contra_of = contraAccount.id;
             }
 
-            // Create a new account
             const newAccount = await prisma.account.create({
-                data: {
-                    name: accountName,
-                    is_temp: isTemp,
-                    liquidity: liquidity,
-                    contra_of: contraAccountId,
-                    type: existingAccount, /////// NOT SURE ABOUT THE TYPE GOTTA CHECK
-                },
+                data: data
             });
 
-            // Add the account ID and user ID to the UserAccount table
-            await prisma.userAccount.create({
-                data: {
-                    id: newAccount.id,
-                    uid: userId,
-                },
-            });
-
-            return RETURN_STATUS_SUCCESS;
+            accountId = newAccount.id;
         }
+        await prisma.userAccount.create({
+            data: {
+                id: accountId,
+                uid: userId,
+            },
+        });
+
+        return Status.SUCCESS;
     } catch (error) {
         console.error(error);
-        return RETURN_STATUS_ACCOUNT_CREATION_FAILED;
+        return Status.FAILED;
     }
 };
