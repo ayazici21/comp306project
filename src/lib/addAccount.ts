@@ -41,8 +41,8 @@ export const addAccount = async (
             if (
                 existingAccount.is_temp === isTemp &&
                 existingAccount.liquidity === liquidity &&
-                existingAccount.contra_of === contraAccount?.id &&
-                existingAccount.type === type // Compare with AccountType
+                existingAccount.contra_of === contraAccount?.id && contraAccount?.id !== null &&
+                existingAccount.type === existingAccount.type !== null && type in AccountType // Compare with AccountType
             ) {
                 // If all properties match, add the account ID with the given user ID to the UserAccount table
                 await prisma.userAccount.create({
@@ -71,7 +71,7 @@ export const addAccount = async (
                             name: contraAcctName,
                             is_temp: true,
                             liquidity: 0,
-                            type: type, // Assign with AccountType
+                            type: existingAccount,  /////// NOT SURE ABOUT THE TYPE GOTTA CHECK
                         },
                     });
                     contraAccountId = newContraAccount.id;
@@ -85,7 +85,7 @@ export const addAccount = async (
                     is_temp: isTemp,
                     liquidity: liquidity,
                     contra_of: contraAccountId,
-                    type: type, // Assign with AccountType
+                    type: existingAccount, /////// NOT SURE ABOUT THE TYPE GOTTA CHECK
                 },
             });
 
