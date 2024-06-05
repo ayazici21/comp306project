@@ -1,13 +1,13 @@
 import HomeLayout from '../layout';
 
-const DashboardPage = () => {
+const LedgerPage = () => {
     return (
         <HomeLayout>
             <div>
-                <h1>Dashboard</h1>
+                <h1>Ledger</h1>
             </div>
         </HomeLayout>
     );
 };
 
-export default DashboardPage;
+export default LedgerPage;
