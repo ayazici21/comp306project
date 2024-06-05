@@ -1,13 +1,13 @@
 import HomeLayout from '../layout';
 
-const DashboardPage = () => {
+const FinancialStatementsPage = () => {
     return (
         <HomeLayout>
             <div>
-                <h1>Dashboard</h1>
+                <h1>Financial Statements</h1>
             </div>
         </HomeLayout>
     );
 };
 
-export default DashboardPage;
+export default FinancialStatementsPage;
