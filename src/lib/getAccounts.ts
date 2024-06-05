@@ -1,31 +1,42 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from "@/lib/prismaClient"
 
-export const getAccounts = async (userId: number): Promise<any[]> => {
+export const getAccounts = async (userId: number): Promise<{
+    id: number;
+    name: string;
+    is_temp: boolean;
+    liquidity: number;
+    contra_of: string | undefined;
+    type: string;
+}[] | null> => {
     try {
-        // Fetch the user accounts
         const userAccounts = await prisma.userAccount.findMany({
             where: {
                 uid: userId,
             },
             include: {
-                Account: true,
-            },
+                Account: {
+                    include: {
+                        Account: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    }
+                }
+            }
         });
 
-        // Extract and return the account details
-        const accounts = userAccounts.map(userAccount => ({
+        return userAccounts.map(userAccount => ({
             id: userAccount.Account.id,
             name: userAccount.Account.name,
             is_temp: userAccount.Account.is_temp,
             liquidity: userAccount.Account.liquidity,
-            contra_of: userAccount.Account.contra_of,
-            type: userAccount.Account.type,
+            contra_of: userAccount.Account.Account?.name,
+            type: userAccount.Account.type as string,
         }));
 
-        return accounts;
     } catch (error) {
         console.error(error);
-        throw new Error('Failed to fetch accounts');
+        return null;
     }
 };
