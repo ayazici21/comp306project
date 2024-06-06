@@ -1,13 +1,16 @@
 import prisma from "@/lib/prismaClient"
 
 export const getAccounts = async (userId: number): Promise<{
-    id: number;
-    name: string;
-    is_temp: boolean;
-    liquidity: number;
-    contra_of: string | undefined;
-    type: string;
-}[] | null> => {
+    ok: boolean,
+    accounts: {
+        id: number,
+        name: string,
+        is_temp: boolean,
+        liquidity: number,
+        contra_of: string | undefined,
+        type: string,
+    }[]
+}> => {
     try {
         const userAccounts = await prisma.userAccount.findMany({
             where: {
@@ -26,17 +29,17 @@ export const getAccounts = async (userId: number): Promise<{
             }
         });
 
-        return userAccounts.map(userAccount => ({
+        return {ok: true, accounts: userAccounts.map(userAccount => ({
             id: userAccount.Account.id,
             name: userAccount.Account.name,
             is_temp: userAccount.Account.is_temp,
             liquidity: userAccount.Account.liquidity,
             contra_of: userAccount.Account.Account?.name,
             type: userAccount.Account.type as string,
-        }));
+        }))};
 
     } catch (error) {
         console.error(error);
-        return null;
+        return {ok: false, accounts: []};
     }
 };

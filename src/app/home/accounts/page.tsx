@@ -1,7 +1,10 @@
-const AccountsPage = () => {
+import Accounts from "@/components/accounts/Accounts";
+
+const AccountsPage = async () => {
+
     return (
-        <div>
-            <h1>Accounts</h1>
+        <div className="flex justify-content-center">
+            <Accounts />
         </div>
     );
 };
