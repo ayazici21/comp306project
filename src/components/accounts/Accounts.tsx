@@ -41,7 +41,6 @@ const Accounts = () => {
         const fetchData = async () => {
             const {ok, accounts} = await getAccounts();
             if (ok) {
-                console.log(accounts)
                 setItems(accounts);
                 setLoading(false);
             } else {
@@ -120,7 +119,11 @@ const Accounts = () => {
 
                 <div className="w-full my-1">
                     <Card>
-                        <DataTable scrollable scrollHeight="75vh" value={items} onRowClick={rowClick} loading={loading}>
+                        <DataTable
+                            scrollable scrollHeight="75vh" value={items}
+                            onRowClick={rowClick} loading={loading}
+                            rowHover={true} rowClassName={() => "cursor-pointer"}
+                        >
                             <Column field="name" header="Name" />
                         </DataTable>
                     </Card>

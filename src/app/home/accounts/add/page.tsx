@@ -108,22 +108,22 @@ const AddAccount = () => {
 
     return (
         <div className="flex justify-content-center">
+            <Toast ref={toast}/>
             <div className="w-full md:w-8 lg:w-6">
-                <Toast ref={toast}/>
                 <h1 className="text-center mb-4">Add an Account</h1>
                 <form onSubmit={handleSubmit} className="p-fluid p-formgrid p-grid gap-4">
                     <div className="p-field p-col-12 py-3">
-                <span className="p-float-label my-1">
-                    <InputText
-                        className="w-full"
-                        name="name"
-                        id="name"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        aria-label="Name"
-                    />
-                    <label htmlFor="name">Name</label>
-                </span>
+                        <span className="p-float-label my-1">
+                            <InputText
+                                className="w-full"
+                                name="name"
+                                id="name"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                aria-label="Name"
+                            />
+                            <label htmlFor="name">Name</label>
+                        </span>
                     </div>
 
                     <div className="p-field p-col-12 py-3">
@@ -157,31 +157,31 @@ const AddAccount = () => {
                     </div>
 
                     <div className="p-field p-col-12 py-3">
-                <span className="p-float-label my-1">
-                    <InputNumber
-                        value={liquidity ?? ""}
-                        onChange={e => setLiquidity(e.value ?? 0)}
-                        min={0}
-                        name="liquidity"
-                        id="liquidity"
-                        aria-label="Account Liquidity"
-                    />
-                    <label htmlFor="liquidity">Account Liquidity</label>
-                </span>
+                        <span className="p-float-label my-1">
+                            <InputNumber
+                                value={liquidity ?? ""}
+                                onChange={e => setLiquidity(e.value ?? 0)}
+                                min={0}
+                                name="liquidity"
+                                id="liquidity"
+                                aria-label="Account Liquidity"
+                            />
+                            <label htmlFor="liquidity">Account Liquidity</label>
+                        </span>
                     </div>
 
                     <div className="p-field p-col-12 py-3">
-                <span className="p-float-label my-1">
-                    <InputText
-                        className="w-full"
-                        name="contraAccountName"
-                        id="contraAccountName"
-                        value={contraOf}
-                        onChange={e => setContraOf(e.target.value)}
-                        aria-label="Contra-Account Name"
-                    />
-                    <label htmlFor="contraAccountName">Contra-Account Name</label>
-                </span>
+                        <span className="p-float-label my-1">
+                            <InputText
+                                className="w-full"
+                                name="contraAccountName"
+                                id="contraAccountName"
+                                value={contraOf}
+                                onChange={e => setContraOf(e.target.value)}
+                                aria-label="Contra-Account Name"
+                            />
+                            <label htmlFor="contraAccountName">Contra-Account Name</label>
+                        </span>
                     </div>
 
                     <div className="p-field p-col-12 text-right py-3 flex">

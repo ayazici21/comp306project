@@ -1,6 +1,8 @@
+'use client'
+
 import Accounts from "@/components/accounts/Accounts";
 
-const AccountsPage = async () => {
+const AccountsPage = () => {
 
     return (
         <div className="flex justify-content-center">
