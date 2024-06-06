@@ -12,7 +12,7 @@ import {ProgressSpinner} from "primereact/progressspinner";
 
 const getIncomeData = async () => {
     const res =
-        await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=income`);
+        await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=income-statement`);
 
     if (res.status === 200) {
         return await res.json();

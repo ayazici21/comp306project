@@ -4,14 +4,14 @@ import React, {useEffect, useRef, useState} from "react";
 import {Toast} from "primereact/toast";
 import type {OwnersEquity} from "@/lib/statements";
 import {Card} from "primereact/card";
-import EquityItem from "@/components/statements/EquityItem";
 import {ProgressSpinner} from "primereact/progressspinner";
+import {formatCurrency} from "@/app/home/financial-statements/currency";
 
 
 const getOwnersEquityData = async () => {
     try {
         const res =
-            await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=income`);
+            await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=owners-equity`);
 
         if (res.status === 200) {
             return await res.json();
@@ -54,23 +54,60 @@ const OwnersEquity = () => {
 
 
     return (
-        loading ? (
-                <div className="w-full h-screen flex flex-column m-auto justify-content-center">
-                    <ProgressSpinner />
-                </div>
-            ) :
-            <div className="p-grid p-dir-col owners-equity">
-                <div className="p-col">
-                    <Card title="Owner's Equity" className="owners-equity-card">
-                        <EquityItem value={beginningEquity} label="Beginning Equity"/>
-                        <EquityItem label={"Net Income"} value={netIncome}/>
-                        <EquityItem label={"Owner Contribution"} value={contribution}/>
-                        <EquityItem label={"Owner Withdrawals"} value={withdrawal}/>
-                        <EquityItem label={"Ending Equity"} value={endingEquity}/>
+        <div>
+            <Toast ref={toast}/>
+            {
+                loading ? (
+                        <div className="w-full h-screen flex flex-column m-auto justify-content-center">
+                            <ProgressSpinner/>
+                        </div>
+                    ) :
+                    <div className="p-grid p-dir-col owners-equity">
+                        <div className="p-col">
+                            <Card title="Owner's Equity" className="owners-equity-card">
+                                <div className="p-fluid">
+                                    <div className="p-field p-grid p-align-center p-justify-between">
+                                        <label className="p-col-fixed font-semibold text-base" style={{width: '150px'}}>Beginning
+                                            Capital:</label>
+                                        <div className="p-col">
+                                            <span>{formatCurrency(beginningEquity)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-field p-grid p-align-center p-justify-between">
+                                        <label className="p-col-fixed font-semibold text-base" style={{width: '150px'}}>Net
+                                            Income:</label>
+                                        <div className="p-col">
+                                            <span>{formatCurrency(netIncome)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-field p-grid p-align-center p-justify-between">
+                                        <label className="p-col-fixed font-semibold text-base" style={{width: '150px'}}>Owner
+                                            Contribution:</label>
+                                        <div className="p-col">
+                                            <span>{formatCurrency(contribution)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-field p-grid p-align-center p-justify-between">
+                                        <label className="p-col-fixed font-semibold text-base" style={{width: '150px'}}>Owner
+                                            Withdrawal:</label>
+                                        <div className="p-col">
+                                            <span>{formatCurrency(withdrawal)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-field p-grid p-align-center p-justify-between">
+                                        <label className="p-col-fixed font-semibold text-base" style={{width: '150px'}}>Ending
+                                            Capital:</label>
+                                        <div className="p-col">
+                                            <span>{formatCurrency(endingEquity)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
+            }
+        </div>
 
-                    </Card>
-                </div>
-            </div>
     )
 
 }

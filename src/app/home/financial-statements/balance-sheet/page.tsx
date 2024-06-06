@@ -13,7 +13,7 @@ import {ProgressSpinner} from "primereact/progressspinner";
 
 const getBalanceSheetData = async () => {
     const res =
-        await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=balance`);
+        await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=balance-sheet`);
 
     if (res.status === 200) {
         return await res.json();

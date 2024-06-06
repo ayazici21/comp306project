@@ -131,10 +131,10 @@ export const ownersEquity = async (userId: number): Promise<OwnersEquity> => {
                 WHEN EI.item_type = 'CREDIT' THEN -EI.value
             END
         ) AS total
-        FROM Account Account
+        FROM Account A
         JOIN EntryItem EI ON A.id = EI.account_ref
         JOIN UserAccount UA ON A.id = UA.id
-        WHERE UA.uid = ? AND LOWER(A.name) LIKE '%withdrawal%'
+        WHERE UA.uid = ${userId} AND LOWER(A.name) LIKE '%withdrawal%'
     `
 
     const contribution: {total: number}[] = await prisma.$queryRaw(contributionQuery, userId);

@@ -23,11 +23,11 @@ export const GET = async (req: NextRequest) => {
         return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
     }
     switch (type) {
-        case 'income':
+        case 'income-statement':
             return incomeStatementHandler(uid);
-        case 'balance':
+        case 'balance-sheet':
             return balanceSheetHandler(uid);
-        case 'owners':
+        case 'owners-equity':
             return ownersEquityHandler(uid);
         default:
             return NextResponse.json({ error: "Invalid statement type" }, { status: 400 })
