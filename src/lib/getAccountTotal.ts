@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from "@/lib/prismaClient"
 
 export const getAccountTotal = async (userId: number, accountName: string): Promise<{ status: boolean, total: number }> => {
     try {
