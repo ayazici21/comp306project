@@ -66,7 +66,7 @@ const TrialBalancePage = () => {
                     </div>
                 ) :
                     <Card title="Trial Balance">
-                        <DataTable value={balances} emptyMessage="" rowClassName={(data, options) => {
+                        <DataTable value={balances} emptyMessage="" rowClassName={data => {
                             if (data.accountName === "Total" && data.debit != data.credit) {
                                 return "text-red-700";
                         }}}>
