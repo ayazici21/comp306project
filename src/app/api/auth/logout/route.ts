@@ -14,7 +14,7 @@ export const POST = async (req: NextRequest) => {
 
         return NextResponse.json({}, {status: 200});
     } catch (e) {
-        console.log(e)
+        console.log("logout/route.ts::POST: " + e);
         return NextResponse.json({error: (e as Error).message}, {status: 500})
     }
 }

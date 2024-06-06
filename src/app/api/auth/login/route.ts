@@ -57,7 +57,7 @@ export const POST = async (req: NextRequest) => {
         }
 
     } catch (error) {
-        console.log(error)
+        console.log("login/route.ts::POST: " + error);
         return NextResponse.json({error: "Something went wrong"}, {status: 500});
     }
 

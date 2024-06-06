@@ -122,6 +122,9 @@ const AddEntry = () => {
                 detail: "Entry added successfully",
                 life: 3000,
             });
+            setDate(new Date());
+            setInputRows([{accountName: "", debit: 0, credit: 0}])
+            inputRows.forEach(() => {})
         } else {
             toast.current!.show({
                 severity: "error",

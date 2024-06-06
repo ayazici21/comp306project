@@ -72,7 +72,7 @@ const Register = () => {
                     detail: "An error occurred. Please try again later",
                     life: 3000,
                 })
-                console.log(e);
+                console.log("Register.tsx: " + e);
             }
 
             setLoading(false);

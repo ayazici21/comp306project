@@ -1,12 +1,11 @@
 import {SignJWT, jwtVerify, JWTPayload} from "jose";
 import * as crypto from "crypto";
 import prisma from "@/lib/prismaClient"
-import {JWTExpired, JWTInvalid} from "jose/errors";
+import {JOSEError} from "jose/errors";
 
-const secretKey = new TextEncoder().encode(process.env.SECRET_KEY!);
+const secretKey = new TextEncoder().encode(process.env.JWT_SECRET!);
 
 export const createToken = async (payload: JWTPayload) => {
-
     return await new SignJWT(payload)
         .setProtectedHeader({alg: "HS256"})
         .setIssuedAt()
@@ -26,10 +25,10 @@ export const invalidateToken = async (token: string) => {
             }
         })
     } catch (error) {
-        if (error instanceof JWTInvalid || error instanceof JWTExpired) {
+        if (error instanceof JOSEError) {
             return;
         }
-        console.log(error)
+        console.log("jwtUtils.ts::invalidateToken: " + error);
     }
 
 }
@@ -44,10 +43,10 @@ export const validateToken = async (token: string) => {
         });
         return !isInvalid;
     } catch (error) {
-        if (error instanceof JWTInvalid || error instanceof JWTExpired) {
+        if (error instanceof JOSEError) {
             return false;
         }
-        console.log(error)
+        console.log("jwtUtils.tsx::validateToken: " + error);
         return false;
     }
 }

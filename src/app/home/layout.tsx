@@ -42,7 +42,7 @@ const HomeLayout = ({children}: { children: React.ReactNode }) => {
                         <Link href="/home/dashboard" className="sidebar-link">Dashboard</Link>
                         <Link href="/home/accounts" className="sidebar-link">Accounts</Link>
                         <Link href="/home/ledger" className="sidebar-link">Ledger</Link>
-                        <Link href="/home/t-balances" className="sidebar-link">T-Balances</Link>
+                        <Link href="/home/trial-balance" className="sidebar-link">Trial Balance</Link>
                         <Link href="/home/financial-statements" className="sidebar-link">Financial Statements</Link>
                     </div>
                     <Button label="Logout" icon="pi pi-sign-out" className="p-button-danger" onClick={logOut}/>
