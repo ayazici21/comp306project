@@ -10,6 +10,7 @@ export enum Status {
     EXISTS,
     FAILED,
     NO_CONTRA_ACCOUNT,
+    EXISTS_USER,
 }
 
 export const addAccount = async (
@@ -67,13 +68,17 @@ export const addAccount = async (
 
             accountId = newAccount.id;
         }
-        await prisma.userAccount.create({
-            data: {
-                id: accountId,
-                uid: userId,
-            },
-        });
 
+        try {
+            await prisma.userAccount.create({
+                data: {
+                    id: accountId,
+                    uid: userId,
+                },
+            });
+        } catch (error) {
+            return Status.EXISTS_USER;
+        }
         return Status.SUCCESS;
     } catch (error) {
         console.error(error);
