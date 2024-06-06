@@ -46,7 +46,6 @@ const Login = () => {
                 detail: "An unknown error has occurred",
                 life: 3000,
             })
-            console.log(res)
         }
         setLoading(false);
     }
