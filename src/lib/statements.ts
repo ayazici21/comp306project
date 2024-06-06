@@ -75,7 +75,7 @@ export const incomeStatement = async (userId: number): Promise<{
 }
 
 
-const ownersEquity = async (userId: number): Promise<{
+export const ownersEquity = async (userId: number): Promise<{
     beginningCapital: number,
     netIncome: number,
     contribution: number,
@@ -118,7 +118,7 @@ const ownersEquity = async (userId: number): Promise<{
     }
 }
 
-const balanceSheet = async (userId: number): Promise<{
+export const balanceSheet = async (userId: number): Promise<{
     assets: Assets
     totalAssets: number,
     liabilities: Liabilities,

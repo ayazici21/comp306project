@@ -39,9 +39,9 @@ const Accounts = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const {ok, accounts} = await getAccounts();
-            if (ok) {
-                setItems(accounts);
+            const res = await getAccounts();
+            if (res !== null) {
+                setItems(res);
                 setLoading(false);
             } else {
                 toast.current!.show({
