@@ -52,7 +52,6 @@ const Ledger = () => {
         })
     })
 
-
     return (
         <div className="flex justify-content-center w-full">
             <Toast ref={toast}/>
@@ -68,8 +67,7 @@ const Ledger = () => {
                         <DataTable
                             scrollable scrollHeight="75vh" value={entries} loading={loading}
                             groupRowsBy="date" rowGroupMode="subheader">
-                            <Column
-                                hidden={true} field="id"/>
+                            <Column hidden={true} field="id" />
                             <Column
                                 field="date" header="Date"
                                 body={(rowData, options) => {
