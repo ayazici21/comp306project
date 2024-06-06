@@ -17,6 +17,7 @@ const AddEntry = () => {
     const [inputRows, setInputRows] = useState<{[key: string]: number | string}[]>([
         {name: "", debit: 0, credit: 0}
     ]);
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleRowChange = (value: string | number, index: number, field: string) => {
@@ -44,6 +45,7 @@ const AddEntry = () => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        setLoading(true);
 
         let uid = localStorage.getItem("userId");
 
@@ -54,6 +56,7 @@ const AddEntry = () => {
                 detail: "Cannot find user data. Please clear your cookies.",
                 life: 3000,
             });
+            setLoading(false);
             return;
         }
 
@@ -64,6 +67,7 @@ const AddEntry = () => {
                 detail: "Enter a valid date",
                 life: 3000,
             });
+            setLoading(false);
             return;
         }
         const data: {accountName: string, value: number, isDebit: boolean}[] = []
@@ -94,6 +98,7 @@ const AddEntry = () => {
                         life: 3000,
                     });
                 }
+                setLoading(false);
                 return;
             }
         }
@@ -125,6 +130,7 @@ const AddEntry = () => {
                 life: 3000,
             })
         }
+        setLoading(false);
     }
 
     return (
@@ -137,7 +143,7 @@ const AddEntry = () => {
                         <span className="flex-auto">
                             <label htmlFor="date" className="font-bold block mb-2"> Date </label>
                             <Calendar
-                                name="date" id="date" showIcon
+                                name="date" id="date" showIcon locale="en" dateFormat="dd/mm/yy"
                                 value={date} onChange={e => setDate(e.value)}/>
                         </span>
                     </div>
@@ -166,7 +172,7 @@ const AddEntry = () => {
                         </DataTable>
                     </div>
                     <div className="flex m-auto w-full mt-4">
-                        <Button type="submit" label="Submit" className="w-full" />
+                        <Button type="submit" label="Submit" className="w-full" loading={loading}/>
                         <Button type="button" label="Back" className="ml-2 w-full" onClick={() => router.push("/home/ledger")}/>
                     </div>
                 </form>
