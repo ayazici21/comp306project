@@ -7,7 +7,7 @@ const LoginPage = () => {
             <div className="my-auto w-8 md:w-6 lg:w-4">
                 <Login/>
                 <p className="p-text-secondary text-center">
-                    Don&apos;t have an account? <Link href="register" className="p-link">Register</Link>
+                    Don&apos;t have an account? <Link href="/register" className="p-link">Register</Link>
                 </p>
             </div>
         </div>

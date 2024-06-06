@@ -1,9 +1,13 @@
+'use client'
+
+import Ledger from "@/components/ledger/Ledger";
+
 const LedgerPage = () => {
     return (
-        <div>
-            <h1>Ledger</h1>
+        <div className="flex justify-content-center">
+            <Ledger />
         </div>
-    );
+    )
 };
 
 export default LedgerPage;

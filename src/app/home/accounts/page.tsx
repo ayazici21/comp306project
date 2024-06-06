@@ -1,7 +1,12 @@
+'use client'
+
+import Accounts from "@/components/accounts/Accounts";
+
 const AccountsPage = () => {
+
     return (
-        <div>
-            <h1>Accounts</h1>
+        <div className="flex justify-content-center">
+            <Accounts />
         </div>
     );
 };

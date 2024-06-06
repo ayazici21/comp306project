@@ -2,7 +2,6 @@ import {NextRequest, NextResponse} from "next/server";
 import {validateToken} from "@/lib/jwtUtils"
 
 export const middleware = (request: NextRequest) => {
-    console.log(request.url)
     if (request.nextUrl.pathname === "/" || request.nextUrl.pathname === "/home") {
         return NextResponse.redirect(new URL("/home/dashboard", request.url));
     } else if (!request.nextUrl.pathname.startsWith("/home")) {
