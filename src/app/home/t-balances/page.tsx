@@ -24,7 +24,9 @@ const TBalancesPage = () => {
   useEffect(() => {
     const fetchTBalances = async () => {
       try {
-        const response = await axios.get('/api/t-balances');
+        const userId = 1; // Replace with actual user ID
+        const response = await axios.get(`/api/t-balances?userId=${userId}`);
+        console.log(response.data); // Log the response data
         setBalances(response.data);
         setLoading(false);
       } catch (err) {
