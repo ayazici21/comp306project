@@ -1,65 +1,83 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
-import { useRef } from 'react';
-import HomeLayout from '../layout';
+import React, {useEffect, useRef, useState} from 'react';
+import {DataTable} from 'primereact/datatable';
+import {Column} from 'primereact/column';
+import {Toast} from 'primereact/toast';
+import {ProgressSpinner} from "primereact/progressspinner";
+import {Card} from "primereact/card";
 
-type TBalance = {
-  accountName: string;
-  accountType: string;
-  debit: number;
-  credit: number;
+type TrialBalance = {
+    trialBalanceData: {
+        accountName: string,
+        total: number
+    }[],
+    totalDebits: number,
+    totalCredits: number,
 };
 
-const TBalancesPage = () => {
-  const [balances, setBalances] = useState<TBalance[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const toast = useRef<Toast>(null);
+const getTrialBalanceData = async (): Promise<TrialBalance | null> => {
+    const res = await fetch(`/api/trial-balance?userId=${localStorage.getItem('userId')}`);
 
-  useEffect(() => {
-    const fetchTBalances = async () => {
-      try {
-        const userId = 1; // Replace with actual user ID
-        const response = await axios.get(`/api/t-balances?userId=${userId}`);
-        setBalances(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch T Balances');
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to fetch T Balances'
+    if (res.status === 200) {
+        return await res.json();
+    }
+    return null;
+}
+
+const TrialBalancePage = () => {
+    const toast = useRef<Toast>(null);
+    const [loading, setLoading] = useState(true);
+    const [balances, setBalances] = useState<{accountName: string, debit: number, credit: number}[]>([]);
+
+    useEffect(() => {
+        getTrialBalanceData().then((data) => {
+            if (data === null) {
+                toast.current!.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "Failed to fetch trial balance data",
+                    life: 3000,
+                });
+            } else {
+                const trialBalanceData = data.trialBalanceData.map(({accountName, total}) => {
+                    return {
+                        accountName,
+                        debit: total > 0 ? total : 0,
+                        credit: total < 0 ? -total : 0
+                    }
+                });
+                trialBalanceData.push({accountName: "Total", debit: data.totalDebits, credit: data.totalCredits});
+
+                setLoading(false);
+                setBalances(trialBalanceData);
+            }
         });
-        setLoading(false);
-      }
-    };
+    }, []);
 
-    fetchTBalances();
-  }, []);
+    return (
+        <div>
+            <Toast ref={toast}/>
 
-  return (
-    <HomeLayout>
-      <div>
-        <Toast ref={toast} />
-        <h1>Trial Balances</h1>
-        {loading && <p>Loading...</p>}
-        {error && <p>{error}</p>}
-        {!loading && !error && (
-          <DataTable value={balances} responsiveLayout="scroll">
-            <Column field="accountName" header="Account Name" />
-            <Column field="accountType" header="Account Type" />
-            <Column field="debit" header="Debit" />
-            <Column field="credit" header="Credit" />
-          </DataTable>
-        )}
-      </div>
-    </HomeLayout>
-  );
+            {
+                loading ? (
+                    <div className="w-full h-screen flex flex-column m-auto justify-content-center">
+                        <ProgressSpinner />
+                    </div>
+                ) :
+                    <Card title="Trial Balance">
+                        <DataTable value={balances} emptyMessage="" rowClassName={(data, options) => {
+                            if (data.accountName === "Total" && data.debit != data.credit) {
+                                return "text-red-700";
+                        }}}>
+                            <Column field="accountName" header="Account Name"/>
+                            <Column field="debit" header="Debit"/>
+                            <Column field="credit" header="Credit"/>
+                        </DataTable>
+                    </Card>
+            }
+        </div>
+    );
 };
 
-export default TBalancesPage;
+export default TrialBalancePage;
