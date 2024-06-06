@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getEntries } from "@/lib/entryService";
-import addEntry from "@/lib/addEntry";
+import { getEntries, addEntry } from "@/lib/entry";
 
 export const GET = async (req: NextRequest) => {
     const { searchParams } = new URL(req.url);
