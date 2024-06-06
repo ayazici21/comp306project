@@ -37,7 +37,7 @@ NUM_ACCOUNTS = len(accounts)
 users = []
 for i in range(NUM_USERS):
     users.append({
-        "id": i + 1,
+        "id": i + 2,
         "username": fake.user_name(),
         "email": fake.email(),
         "password_hashed": fake.password(length=10)
@@ -48,7 +48,7 @@ entries = []
 for i in range(NUM_ENTRIES):
     entries.append({
         "id": i + 1,
-        "owner_id": random.choice(range(1, NUM_USERS + 1)),
+        "owner_id": random.choice(range(2, NUM_USERS + 2)),
         "date_entered": fake.date_time_this_year()
     })
 
@@ -57,9 +57,9 @@ entry_items = []
 entry_id_to_items = {i + 1: [] for i in range(NUM_ENTRIES)}
 
 for entry_id in range(1, NUM_ENTRIES + 1):
-    num_items = random.randint(2, 5)  # Each entry will have between 2 and 5 items
+    num_items = random.randint(2, 5)
     total_value = 0
-    for _ in range(num_items - 1):  # Generate (num_items - 1) items first
+    for _ in range(num_items - 1):
         item_type = random.choice(["DEBIT", "CREDIT"])
         value = fake.random_int(min=200, max=5000)
         account_ref = random.choice(range(1, NUM_ACCOUNTS + 1))
