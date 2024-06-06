@@ -46,7 +46,7 @@ const TBalancesPage = () => {
     <HomeLayout>
       <div>
         <Toast ref={toast} />
-        <h1>T Balances</h1>
+        <h1>Trial Balances</h1>
         {loading && <p>Loading...</p>}
         {error && <p>{error}</p>}
         {!loading && !error && (
