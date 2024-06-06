@@ -1,6 +1,5 @@
-import {getAccounts} from "@/lib/getAccounts";
 import {NextRequest, NextResponse} from "next/server";
-import {addAccount, Status} from "@/lib/addAccount";
+import {addAccount, getAccounts, Status} from "@/lib/account";
 
 export const GET = async (req: NextRequest) => {
     const url = new URL(req.nextUrl);

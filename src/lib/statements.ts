@@ -1,69 +1,102 @@
 import prisma from "@/lib/prismaClient"
 import { Prisma } from "@prisma/client";
 
-type Revenues = {
+export type Revenues = {
     accountName: string,
     total: number
 }[];
 
-type Expenses = {
+export type Expenses = {
     accountName: string,
     total: number
 }[]
 
-type Assets = {
+export type Assets = {
     accountName: string,
     total: number
 }[];
 
-type Liabilities = {
+export type Liabilities = {
     accountName: string,
     total: number
 }[]
 
-type Equity = {
+export type Equity = {
     accountName: string,
     total: number
 }[]
 
-export const incomeStatement = async (userId: number): Promise<{
+export type IncomeStatement = {
     revenues: Revenues,
     totalRevenues: number,
     expenses: Expenses,
     totalExpenses: number,
     netIncome: number
-}> => {
+}
+
+export type OwnersEquity = {
+    beginningCapital: number,
+    netIncome: number,
+    contribution: number,
+    withdrawal: number,
+    endingCapital: number
+}
+
+export type BalanceSheet = {
+    assets: Assets
+    totalAssets: number,
+    liabilities: Liabilities,
+    totalLiabilities: number,
+    equity: Equity,
+    totalEquity: number,
+    totalLiabilitiesAndEquity: number
+}
+
+export const incomeStatement = async (userId: number): Promise<IncomeStatement> => {
     const revenueQuery = Prisma.sql`
-        SELECT A.name, SUM(
-            cases
-                when EI.item_type = 'DEBIT' then EI.value
-                when EI.item_type = 'CREDIT' then -EI.value
-            end
-        ) as total
+        SELECT A.name as accountName, 
+               SUM(
+                   CASE 
+                       WHEN EI.item_type = 'DEBIT' THEN -EI.value
+                       WHEN EI.item_type = 'CREDIT' THEN +EI.value
+                   END
+               ) AS total
         FROM Account A
-        JOIN EntryItem EI ON A.id = ei.account_ref
-        JOIN UserAccount UA on A.id = UA.id
-        WHERE UA.uid = ? AND LOWER(A.name) LIKE '%revenue%'
-        GROUP BY A.name;`;
+        JOIN EntryItem EI ON A.id = EI.account_ref
+        JOIN UserAccount UA ON A.id = UA.id
+        JOIN Entry E ON E.id = EI.entry_ref
+        WHERE UA.uid = ${userId}
+          AND LOWER(A.name) LIKE '%revenue%'
+        GROUP BY A.name
+        ORDER BY A.liquidity DESC;`;
 
     const expenseQuery = Prisma.sql`
-        SELECT A.name, SUM(
-            cases
-                when EI.item_type = 'DEBIT' then EI.value
-                when EI.item_type = 'CREDIT' then -EI.value
-            end
-        ) as total
+        SELECT A.name as accountName, 
+               SUM(
+                   CASE 
+                       WHEN EI.item_type = 'DEBIT' THEN EI.value
+                       WHEN EI.item_type = 'CREDIT' THEN -EI.value
+                   END
+               ) AS total
         FROM Account A
-        JOIN EntryItem EI ON A.id = ei.account_ref
-        JOIN UserAccount UA on A.id = UA.id
-        WHERE UA.uid = ? AND LOWER(A.name) LIKE '%expense%'
-        GROUP BY A.name;`
+        JOIN EntryItem EI ON A.id = EI.account_ref
+        JOIN UserAccount UA ON A.id = UA.id
+        JOIN Entry E ON E.id = EI.entry_ref
+        WHERE UA.uid = ${userId}
+          AND LOWER(A.name) LIKE '%expense%'
+        GROUP BY A.name
+        ORDER BY A.liquidity DESC;`
 
-    const revenues: Revenues = await prisma.$queryRaw(revenueQuery, userId);
-    const expenses: Expenses = await prisma.$queryRaw(expenseQuery, userId);
+    const revenues: Revenues = await prisma.$queryRaw(revenueQuery);
+    const expenses: Expenses = await prisma.$queryRaw(expenseQuery);
 
-    const totalRevenues = revenues.reduce((acc, { total }) => acc + total, 0);
-    const totalExpenses = expenses.reduce((acc, { total }) => acc + total, 0);
+    let totalRevenues = 0;
+
+    revenues.forEach(({ total }) => totalRevenues += Number(total));
+
+    let totalExpenses = 0;
+
+    expenses.forEach(({ total }) => totalExpenses += Number(total));
 
     return {
         revenues,
@@ -75,36 +108,43 @@ export const incomeStatement = async (userId: number): Promise<{
 }
 
 
-const ownersEquity = async (userId: number): Promise<{
-    beginningCapital: number,
-    netIncome: number,
-    contribution: number,
-    withdrawal: number,
-    endingCapital: number
-}> => {
+export const ownersEquity = async (userId: number): Promise<OwnersEquity> => {
     const {netIncome} = await incomeStatement(userId);
 
     const contributionQuery = Prisma.sql`
-        SELECT SUM(*) AS total
-        FROM Account Account
+        SELECT SUM(
+            CASE
+                WHEN EI.item_type = 'DEBIT' THEN -EI.value
+                WHEN EI.item_type = 'CREDIT' THEN EI.value
+            END
+        ) AS total
+        FROM Account A
         JOIN EntryItem EI ON A.id = EI.account_ref
         JOIN UserAccount UA ON A.id = UA.id
-        WHERE UA.uid = ? AND LOWER(A.name) LIKE '%capital%'
+        WHERE UA.uid = ${userId} AND LOWER(A.name) LIKE '%capital%'
     `
 
     const withdrawalQuery = Prisma.sql`
-        SELECT SUM(*) AS total
-        FROM Account Account
+        SELECT SUM(
+            CASE
+                WHEN EI.item_type = 'DEBIT' THEN EI.value
+                WHEN EI.item_type = 'CREDIT' THEN -EI.value
+            END
+        ) AS total
+        FROM Account A
         JOIN EntryItem EI ON A.id = EI.account_ref
         JOIN UserAccount UA ON A.id = UA.id
-        WHERE UA.uid = ? AND LOWER(A.name) LIKE '%withdrawal%'
+        WHERE UA.uid = ${userId} AND LOWER(A.name) LIKE '%withdrawal%'
     `
 
     const contribution: {total: number}[] = await prisma.$queryRaw(contributionQuery, userId);
     const withdrawal: {total: number}[] = await prisma.$queryRaw(withdrawalQuery, userId);
 
-    const totalContribution = contribution.reduce((acc, { total }) => acc + total, 0);
-    const totalWithdrawals = withdrawal.reduce((acc, { total }) => acc + total, 0);
+    let totalContribution = 0;
+    contribution.forEach(({ total }) => totalContribution += Number(total));
+
+    const totalWithdrawals = 0;
+    withdrawal.forEach(({ total }) => totalContribution += Number(total));
 
     const beginningCapital = 0;
     const endingCapital = beginningCapital + totalContribution + netIncome - totalWithdrawals;
@@ -118,66 +158,64 @@ const ownersEquity = async (userId: number): Promise<{
     }
 }
 
-const balanceSheet = async (userId: number): Promise<{
-    assets: Assets
-    totalAssets: number,
-    liabilities: Liabilities,
-    totalLiabilities: number,
-    equity: Equity,
-    totalLiabilitiesAndEquity: number
-}> => {
+export const balanceSheet = async (userId: number): Promise<BalanceSheet> => {
     const assetsQuery = Prisma.sql`
-        SELECT a.name, SUM(
-            CASES
+        SELECT A.name as accountName, SUM(
+            CASE
                 WHEN EI.item_type = 'DEBIT' THEN EI.value
                 WHEN EI.item_type = 'CREDIT' THEN -EI.value
             END
-        )
+        ) as total
         FROM Account A
         JOIN EntryItem EI ON A.id = EI.account_ref
         JOIN UserAccount UA ON A.id = UA.id
-        WHERE UA.uid = ? AND A.type = 'ASSET'
+        WHERE UA.uid = ${userId} AND A.type = 'ASSET'
         GROUP BY A.name
         ORDER BY A.liquidity DESC;
     `
 
     const liabilitiesQuery = Prisma.sql`
-        SELECT a.name, SUM(
-            CASES
-                WHEN EI.item_type = 'DEBIT' THEN EI.value
-                WHEN EI.item_type = 'CREDIT' THEN -EI.value
+        SELECT A.name as accountName, SUM(
+            CASE
+                WHEN EI.item_type = 'DEBIT' THEN -EI.value
+                WHEN EI.item_type = 'CREDIT' THEN EI.value
             END
-        )
+        ) as total
         FROM Account A
         JOIN EntryItem EI ON A.id = EI.account_ref
         JOIN UserAccount UA ON A.id = UA.id
-        WHERE UA.uid = ? AND A.type = 'LIABILITY'
+        WHERE UA.uid = ${userId} AND A.type = 'LIABILITY'
         GROUP BY A.name
         ORDER BY A.liquidity DESC;
     `
 
     const equityQuery = Prisma.sql`
-        SELECT a.name, SUM(
-            CASES
-                WHEN EI.item_type = 'DEBIT' THEN EI.value
-                WHEN EI.item_type = 'CREDIT' THEN -EI.value
+        SELECT A.name as accountName, SUM(
+            CASE
+                WHEN EI.item_type = 'DEBIT' THEN -EI.value
+                WHEN EI.item_type = 'CREDIT' THEN EI.value
             END
-        )
+        ) as total
         FROM Account A
         JOIN EntryItem EI ON A.id = EI.account_ref
         JOIN UserAccount UA ON A.id = UA.id
-        WHERE UA.uid = ? AND A.type = 'EQUITY'
+        WHERE UA.uid = ${userId} AND A.type = 'EQUITY'
         GROUP BY A.name
         ORDER BY A.liquidity DESC;
     `
 
-    const assets: Assets = await prisma.$queryRaw(assetsQuery, userId);
-    const liabilities: Liabilities = await prisma.$queryRaw(liabilitiesQuery, userId);
-    const equity: Equity = await prisma.$queryRaw(equityQuery, userId);
+    const assets: Assets = await prisma.$queryRaw(assetsQuery);
+    const liabilities: Liabilities = await prisma.$queryRaw(liabilitiesQuery);
+    const equity: Equity = await prisma.$queryRaw(equityQuery);
 
-    const totalAssets = assets.reduce((acc, { total }) => acc + total, 0);
-    const totalLiabilities = liabilities.reduce((acc, { total }) => acc + total, 0);
-    const totalEquity = equity.reduce((acc, { total }) => acc + total, 0);
+    let totalAssets = 0;
+    assets.forEach(({ total }) => totalAssets += Number(total));
+
+    let totalLiabilities = 0;
+    liabilities.forEach(({ total }) => totalLiabilities += Number(total));
+
+    let totalEquity = 0;
+    equity.forEach(({ total }) => totalEquity += Number(total));
 
     return {
         assets,
@@ -185,6 +223,7 @@ const balanceSheet = async (userId: number): Promise<{
         liabilities,
         totalLiabilities,
         equity,
+        totalEquity,
         totalLiabilitiesAndEquity: totalLiabilities + totalEquity
     }
 }
