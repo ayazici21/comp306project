@@ -1,6 +1,8 @@
 import random
+from itertools import count
 from faker import Faker
 import pandas as pd
+
 
 fake = Faker()
 
@@ -41,10 +43,12 @@ EQUITY = [
     ("Bank Expense", 500, True, None),
 ]
 
+counter = count(1)
 accounts = []
 for account_type, account_names in {"ASSET": ASSET, "LIABILITY": LIABILITY, "EQUITY": EQUITY}.items():
     for account_name, liquidity, is_temp, contra_of in account_names:
         accounts.append({
+            "id": next(count),
             "name": account_name,
             "is_temp": is_temp,
             "liquidity": liquidity,
@@ -68,13 +72,14 @@ entry_id_to_items = {i + 1: [] for i in range(NUM_ENTRIES)}
 for entry_id in range(1, NUM_ENTRIES + 1):
     num_items = random.randint(2, 5)
     total_value = 0
-    for _ in range(num_items - 1):
+    account_refs = list(range(1, NUM_ACCOUNTS + 1))
+    random.shuffle(account_refs)
+    for account_ref_idx in range(num_items - 1):
         item_type = random.choice(["DEBIT", "CREDIT"])
         value = fake.random_int(min=200, max=5000)
-        account_ref = random.choice(range(1, NUM_ACCOUNTS + 1))
         entry_items.append({
             "entry_ref": entry_id,
-            "account_ref": account_ref,
+            "account_ref": account_refs[account_ref_idx],
             "item_type": item_type,
             "value": value
         })
@@ -83,10 +88,9 @@ for entry_id in range(1, NUM_ENTRIES + 1):
 
     balance_item_type = "DEBIT" if total_value < 0 else "CREDIT"
     balance_value = abs(total_value)
-    account_ref = random.choice(range(1, NUM_ACCOUNTS + 1))
     entry_items.append({
         "entry_ref": entry_id,
-        "account_ref": account_ref,
+        "account_ref": account_refs[accoun_ref_idx + 1],
         "item_type": balance_item_type,
         "value": balance_value
     })
