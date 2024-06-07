@@ -1,35 +1,15 @@
 import prisma from "@/lib/prismaClient"
 import { Prisma } from "@prisma/client";
 
-export type Revenues = {
+export type Account = {
     accountName: string,
     total: number
 }[];
-
-export type Expenses = {
-    accountName: string,
-    total: number
-}[]
-
-export type Assets = {
-    accountName: string,
-    total: number
-}[];
-
-export type Liabilities = {
-    accountName: string,
-    total: number
-}[]
-
-export type Equity = {
-    accountName: string,
-    total: number
-}[]
 
 export type IncomeStatement = {
-    revenues: Revenues,
+    revenues: Account,
     totalRevenues: number,
-    expenses: Expenses,
+    expenses: Account,
     totalExpenses: number,
     netIncome: number
 }
@@ -43,11 +23,11 @@ export type OwnersEquity = {
 }
 
 export type BalanceSheet = {
-    assets: Assets
+    assets: Account
     totalAssets: number,
-    liabilities: Liabilities,
+    liabilities: Account,
     totalLiabilities: number,
-    equity: Equity,
+    equity: Account,
     totalEquity: number,
     totalLiabilitiesAndEquity: number
 }
@@ -87,8 +67,8 @@ export const incomeStatement = async (userId: number): Promise<IncomeStatement> 
         GROUP BY A.name
         ORDER BY A.liquidity DESC;`
 
-    const revenues: Revenues = await prisma.$queryRaw(revenueQuery);
-    const expenses: Expenses = await prisma.$queryRaw(expenseQuery);
+    const revenues: Account = await prisma.$queryRaw(revenueQuery);
+    const expenses: Account = await prisma.$queryRaw(expenseQuery);
 
     let totalRevenues = 0;
 
@@ -204,9 +184,9 @@ export const balanceSheet = async (userId: number): Promise<BalanceSheet> => {
         ORDER BY A.liquidity DESC;
     `
 
-    const assets: Assets = await prisma.$queryRaw(assetsQuery);
-    const liabilities: Liabilities = await prisma.$queryRaw(liabilitiesQuery);
-    const equity: Equity = await prisma.$queryRaw(equityQuery);
+    const assets: Account = await prisma.$queryRaw(assetsQuery);
+    const liabilities: Account = await prisma.$queryRaw(liabilitiesQuery);
+    const equity: Account = await prisma.$queryRaw(equityQuery);
 
     let totalAssets = 0;
     assets.forEach(({ total }) => totalAssets += Number(total));

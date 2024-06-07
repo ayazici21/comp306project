@@ -3,11 +3,10 @@
 import React, {useEffect, useState} from "react";
 import {useRef} from "react";
 import {Toast} from "primereact/toast";
-import type {Assets, BalanceSheet, Equity, Expenses, IncomeStatement, Liabilities, Revenues} from "@/lib/statements";
+import type {Account, BalanceSheet} from "@/lib/statements";
 import {Card} from "primereact/card";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
-import {classNames} from "primereact/utils";
 import {formatCurrency} from "@/app/home/financial-statements/currency";
 import {ProgressSpinner} from "primereact/progressspinner";
 
@@ -24,15 +23,18 @@ const getBalanceSheetData = async () => {
 const BalanceSheetPage = () => {
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(true);
-    const [assetsData, setAssetsData] = useState<Assets>([]);
+    const [assetsData, setAssetsData] = useState<Account>([]);
     const [totalAssets, setTotalAssets] = useState(0);
-    const [liabilitiesData, setLiabilitiesData] = useState<Liabilities>([]);
+    const [liabilitiesData, setLiabilitiesData] = useState<Account>([]);
     const [totalLiabilities, setTotalLiabilities] = useState(0);
-    const [equityData, setEquityData] = useState<Equity>([]);
+    const [equityData, setEquityData] = useState<Account>([]);
     const [totalEquity, setTotalEquity] = useState(0);
     const [totalLiabilitiesAndEquity, setTotalLiabilitiesAndEquity] = useState(0)
 
     useEffect(() => {
+        if (!loading) {
+            return;
+        }
         getBalanceSheetData().then((data: BalanceSheet) => {
             if (data === null) {
                 toast.current!.show({
@@ -52,7 +54,7 @@ const BalanceSheetPage = () => {
                 setLoading(false);
             }
         })
-    }, []);
+    });
 
     const isClose = (n1: number, n2: number, precision: number = 3) => {
         return Math.abs(n1 - n2) <= Math.pow(10, -precision);
@@ -103,7 +105,7 @@ const BalanceSheetPage = () => {
                     </div>
                     <div className="p-grid total-liabilities-equity">
                         <div className="p-col">
-                            <span className={isClose(totalAssets, totalLiabilitiesAndEquity) ? "text-secondary" : "text-red-700"}>Total Liabilities and Owner's Equity: {formatCurrency(totalLiabilitiesAndEquity)}</span>
+                            <span className={isClose(totalAssets, totalLiabilitiesAndEquity) ? "text-secondary" : "text-red-700"}>Total Liabilities and Owner&apos;s Equity: {formatCurrency(totalLiabilitiesAndEquity)}</span>
                         </div>
                     </div>
                 </Card>
