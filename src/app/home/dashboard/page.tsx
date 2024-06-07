@@ -5,6 +5,7 @@ import {Account, BalanceSheet} from "@/lib/statements";
 import React, {useEffect, useRef, useState} from "react";
 import {Toast} from "primereact/toast";
 import {ProgressSpinner} from "primereact/progressspinner";
+import {Card} from "primereact/card";
 
 const fetchData = async (): Promise<BalanceSheet | null> => {
     const res = await fetch(`/api/financial-statements?userId=${localStorage.getItem('userId')}&type=balance-sheet`);
@@ -60,6 +61,10 @@ const DashboardPage = () => {
         })
     })
 
+    const computedStyle = getComputedStyle(document.documentElement);
+    const color = computedStyle.getPropertyValue('--primary-color');
+    const font = computedStyle.getPropertyValue('--font-family');
+
     return (
         <div>
             <Toast ref={toast} />
@@ -69,25 +74,56 @@ const DashboardPage = () => {
                             <ProgressSpinner />
                         </div>
                     ) :
-                    <div className="flex h-screen flex-column m-auto w-10 md:w-9 lg:w-6">
-                        <Chart
-                            type="pie" className="p-3"
-                            data={{
-                                labels: ['Assets', 'Liabilities', 'Equity'],
-                                datasets: [{
-                                    data: [totalAssets, totalLiabilities, totalEquity],
-                                }]
-                            }} />
+                    <Card title="Dashboard">
+                        <div className="w-10 md:w-8 lg:w-7 m-auto">
 
-                        <Chart
-                            type="pie" className="p-3"
-                            data={{
-                                labels: totalAccounts.map(account => account.accountName),
-                                datasets: [{
-                                    data: totalAccounts.map(account => Math.abs(account.total))
-                                }]
-                            }} />
-                    </div>
+                            <Chart
+                                type="pie" className="p-3"
+                                data={{
+                                    labels: ['Assets', 'Liabilities', 'Equity'],
+                                    datasets: [{
+                                        data: [totalAssets, totalLiabilities, totalEquity],
+                                    }]
+                                }}
+                                options={{
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Overall Financial Position',
+                                            color: color,
+                                            font: {
+                                                size: 20,
+                                                family: font
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+
+                            <Chart
+                                type="pie" className="p-3"
+                                data={{
+                                    labels: totalAccounts.map(account => account.accountName),
+                                    datasets: [{
+                                        data: totalAccounts.map(account => Math.abs(account.total))
+                                    }]
+                                }}
+                                options={{
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Detailed Account Breakdown',
+                                            color: color,
+                                            font: {
+                                                size: 20,
+                                                family: font
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    </Card>
 
             }
         </div>
