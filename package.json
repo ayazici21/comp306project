@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@prisma/client": "^5.15.0",
-    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
+    "chart.js": "^4.4.3",
     "jose": "^5.4.0",
     "next": "^14.2.3",
     "npm": "^10.8.0",

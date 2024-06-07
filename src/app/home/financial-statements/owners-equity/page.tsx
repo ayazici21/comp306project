@@ -33,6 +33,9 @@ const OwnersEquity = () => {
     const [endingEquity, setEndingEquity] = useState(0);
 
     useEffect(() => {
+        if (!loading) {
+            return;
+        }
         getOwnersEquityData().then((data: OwnersEquity | null) => {
             if (data === null) {
                 toast.current!.show({

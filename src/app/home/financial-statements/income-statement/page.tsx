@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {useRef} from "react";
 import {Toast} from "primereact/toast";
-import type {Expenses, IncomeStatement, Revenues} from "@/lib/statements";
+import type {IncomeStatement, Account} from "@/lib/statements";
 import {Card} from "primereact/card";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
@@ -23,13 +23,16 @@ const getIncomeData = async () => {
 const IncomeStatementPage = () => {
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(true);
-    const [revenueData, setRevenueData] = useState<Revenues>([]);
+    const [revenueData, setRevenueData] = useState<Account>([]);
     const [totalRevenues, setTotalRevenues] = useState(0);
-    const [expenseData, setExpenseData] = useState<Expenses>([]);
+    const [expenseData, setExpenseData] = useState<Account>([]);
     const [totalExpenses, setTotalExpenses] = useState(0);
     const [netIncome, setNetIncome] = useState(0);
 
     useEffect(() => {
+        if (!loading) {
+            return;
+        }
         getIncomeData().then((data: IncomeStatement | null) => {
             if (data === null) {
                 toast.current!.show({
@@ -47,7 +50,7 @@ const IncomeStatementPage = () => {
                 setLoading(false);
             }
         })
-    }, []);
+    });
 
     return (
         loading ? (
